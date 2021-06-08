@@ -1,0 +1,31 @@
+import cv2
+import socket
+import pickle
+import struct
+s = socket.socket()
+cS = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+cS.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+s.bind(("", 5555))
+s.listen()
+
+while True:
+    cname,addr = s.accept()
+    if cname:
+        cap = cv2.VideoCapture(0)
+        
+        while(cap.isOpened()):
+            img,vid = cap.read()
+            a = pickle.dumps(vid)
+            message = struct.pack("Q",len(a))+a
+            cname.sendall(message)
+            
+		
+            cv2.imshow('reciver',vid)
+            key = cv2.waitKey(1) & 0xFF
+            if key ==ord('q'):
+                cv2.destroyAllWindows() 
+                cname.close()
+   
+        
+
+cap.release()
